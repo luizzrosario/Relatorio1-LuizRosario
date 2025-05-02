@@ -1,78 +1,61 @@
-# Importa a classe math para operações mais complexas
-import math
-
-# Importa classe para usar o metodo de sair do programa caso exista alguma divisão por zero
-import sys
-
-# Função para calcular uma raiz aproximada de uma função pelo metodo da Secante
-def secant(a, b, epsilon, fx):
-    # Faz a eescrita no arquivo txt do cabeçalho dos dados
-    with open("secante-res.txt", "w") as file:
-        file.write("xn\t\t\t\t\t\tf(xn)\n")
-        file.write(f"{a:6f}\t\t\t\t")
-        x = a
-        file.write(f"{eval(fx):6f}\n")
-
-    # Loop para aproximar a raiz
-    while(True):
-        # Valor de xk-1
-        x = a
-        f1 = eval(fx)
-
-        # Valor de xk
-        x = b
-        f2 = eval(fx)
-
-        # Escreve no arquivo os dados que estão sendo gerados a cada iteração
-        with open("secante-res.txt", "a") as file:
-            file.write(f"{b:6f}\t\t\t\t")
-            file.write(f"{f2:6f}\n")
-
-        # Se o valor da função no xk seja menor ou igual a tolerancia o algoritmo retorna o xk
-        if module(f2) <= epsilon:
-             return b
-
-        # Guardao anterior do xk para que na proxima iteração ele seja o xk-1
-        b_temp = b
-
-        # Retorna um erro e sai do programa caso tenha uma divisão por zero
-        if a == b:
-             print("Can't devide by zero!\n")
-             sys.exit()
-
-        # Calcula o xk+1
-        b = (f2 * a - f1 * b) / (f2 - f1)
-
-        # xk agora se torna xk-1
-        a = b_temp
+import math  # Biblioteca para operações matemáticas
+import sys  # Usada para encerrar o programa em caso de erro crítico
 
 
-# Retorna o modulo de um número
-def module(x):
-    if x < 0:
-        return (-1 * x)
+# Função que aplica o método da Secante para encontrar uma raiz aproximada
+def metodo_secante(x_antigo, x_atual, tolerancia, expressao):
+    # Cria o arquivo e escreve o cabeçalho
+    with open("secante-res.txt", "w") as arquivo:
+        arquivo.write("x_n\t\t\t\tf(x_n)\n")
+        x = x_antigo
+        arquivo.write(f"{x_antigo:6f}\t\t{eval(expressao):6f}\n")
 
-    return x
+    while True:
+        x = x_antigo
+        f_antigo = eval(expressao)
 
-# Faz a leitura do arquivo onde estão os dados
-with open("secante-fun.txt", "r") as file:
-    lines = file.readlines()
+        x = x_atual
+        f_atual = eval(expressao)
 
-# Pega a função na primeira linha do arquivo
-func = lines[0].rstrip()
+        # Salva os valores da iteração
+        with open("secante-res.txt", "a") as arquivo:
+            arquivo.write(f"{x_atual:6f}\t\t{f_atual:6f}\n")
 
-# Pega o valor de a e b na segunda linha
-a_str, b_str = lines[1].split()
+        # Verifica critério de parada
+        if modulo(f_atual) <= tolerancia:
+            return x_atual
 
-a = float(a_str)
-b = float(b_str)
+        # Evita divisão por zero
+        if f_atual == f_antigo:
+            print("Erro: divisão por zero detectada!")
+            sys.exit()
 
-# Pega o valor do epsilon na ultima linha
-epsilon = float(lines[2])
+        # Atualiza o próximo valor de x usando a fórmula da secante
+        proximo_x = (f_atual * x_antigo - f_antigo * x_atual) / (f_atual - f_antigo)
 
-# Pega o retorno da função com o valor da raiz aproximada
-answer = secant(a, b, epsilon, func)
+        # Atualiza os valores para a próxima iteração
+        x_antigo = x_atual
+        x_atual = proximo_x
 
-# Escreve o valor da raiz aproximada no arquivo
-with open("secante-res.txt", "a") as file:
-            file.write(f"Raiz aproximada = {answer:6f}")
+
+# Retorna o valor absoluto de um número
+def modulo(valor):
+    return -valor if valor < 0 else valor
+
+
+# Lê os dados do arquivo de entrada
+with open("secante-fun.txt", "r") as arquivo:
+    linhas = arquivo.readlines()
+
+expressao = linhas[0].strip()
+x1_str, x2_str = linhas[1].split()
+x_inicial = float(x1_str)
+x_segundo = float(x2_str)
+tolerancia = float(linhas[2])
+
+# Executa o método e obtém a raiz aproximada
+raiz_aproximada = metodo_secante(x_inicial, x_segundo, tolerancia, expressao)
+
+# Registra o valor final da raiz no arquivo
+with open("secante-res.txt", "a") as arquivo:
+    arquivo.write(f"Raiz aproximada = {raiz_aproximada:6f}")

@@ -1,60 +1,49 @@
-# Importa a classe math para operações mais complexas
-import math
+import math  # Biblioteca para operações matemáticas
 
-# Função para calcular uma raiz aproximada de uma função pelo metodo Newton Raphson
-def newtonRaphson(a, b, epsilon, fx, fxl):
-    # Faz a eescrita no arquivo txt do cabeçalho dos dados
-    with open("newtonraphson-res.txt", "w") as file:
-        file.write("xn\t\t\t\tf(xn)\n")
 
-    # Pega a mediana entre os pontos "a" e "b"
-    x = (a + b) / 2
+# Função que calcula uma raiz aproximada usando o método de Newton-Raphson
+def newton_raphson(inicio, fim, tolerancia, expressao, derivada):
+    # Cria o arquivo com o cabeçalho dos resultados
+    with open("newtonraphson-res.txt", "w") as arquivo:
+        arquivo.write("x_n\t\t\t\tf(x_n)\n")
 
-    # Loop para aproximar a raiz
-    while(True):
-        f = eval(fx)
+    # Começa pelo ponto médio entre os extremos
+    x = (inicio + fim) / 2
 
-        # Escreve no arquivo os dados que estão sendo gerados nas iterações
-        with open("newtonraphson-res.txt", "a") as file:
-            file.write(f"{x:6f}\t\t")
-            file.write(f"{f:6f}\n")
+    while True:
+        f_x = eval(expressao)
 
-        # Se o valor da função na possivel raiz for menor ou igual a tolerancia(condição de parada) o algoritmo retorna o valor x
-        if module(f) <= epsilon:
+        # Registra os valores a cada iteração
+        with open("newtonraphson-res.txt", "a") as arquivo:
+            arquivo.write(f"{x:6f}\t\t{f_x:6f}\n")
+
+        # Verifica se já atingiu a precisão desejada
+        if modulo(f_x) <= tolerancia:
             return x
 
-        # Calcula o novo valor de x com base em f(x) e f'(x)
-        x = x - (eval(fx) / eval(fxl))
+        # Atualiza o valor de x usando a fórmula do método
+        x = x - (eval(expressao) / eval(derivada))
 
-# Retorna o modulo de um número
-def module(x):
-    if x < 0:
-        return (-1 * x)
 
-    return x
+# Retorna o valor absoluto de um número
+def modulo(valor):
+    return -valor if valor < 0 else valor
 
-# Faz a leitura do arquivo onde estão os dados
-with open("newtonraphson-fun.txt", "r") as file:
-    lines = file.readlines()
 
-# Pega a função na primeira linha do arquivo
-func = lines[0].rstrip()
+# Lê os dados do arquivo de entrada
+with open("newtonraphson-fun.txt", "r") as arquivo:
+    linhas = arquivo.readlines()
 
-# Pega a derivada da função na segunda linha do arquivo
-df = lines[1].rstrip()
+expressao = linhas[0].strip()  # Função original
+derivada_expr = linhas[1].strip()  # Derivada da função
+inicio_str, fim_str = linhas[2].split()
+inicio = float(inicio_str)
+fim = float(fim_str)
+tolerancia = float(linhas[3])  # Critério de parada
 
-# Pega o valor de "a" e "b" na terceira linha
-a_str, b_str = lines[2].split()
+# Executa o método de Newton-Raphson
+raiz_aproximada = newton_raphson(inicio, fim, tolerancia, expressao, derivada_expr)
 
-a = float(a_str)
-b = float(b_str)
-
-# Pega o valor do epsilon na ultima linha
-epsilon = float(lines[3])
-
-# Pega o retorno da função com o valor da raiz aproximada
-answer = newtonRaphson(a, b, epsilon, func, df)
-
-# Escreve o valor da raiz aproximada no arquivo
-with open("newtonraphson-res.txt", "a") as file:
-            file.write(f"Raiz aproximada = {answer:6f}")
+# Escreve o resultado final no arquivo
+with open("newtonraphson-res.txt", "a") as arquivo:
+    arquivo.write(f"Raiz aproximada = {raiz_aproximada:6f}")

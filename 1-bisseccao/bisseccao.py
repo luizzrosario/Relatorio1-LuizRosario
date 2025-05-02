@@ -1,80 +1,66 @@
-# Importa a classe math para calculos matematicos mais complexos como seno, cosseno e tangente ou outras operações
-import math
+import math  # Importa a biblioteca para operações matemáticas
 
-# Função para calcular uma raiz aproximada de de uma função pelo metodo da bissecção
-def bissection(a, b, epsilon, fx):
-    # Escreve o cabeçalho do arquivo de resposta
-    with open("bisseccao-res.txt", "w") as file:
-        file.write("a				b				f(a)			f(b)			(bk-ak)			(bk-ak)/ak		x				f(x)\n")
 
-    # Laço de repertição para calcular a raiz aproximada
-    while(True):
-        x = (a + b) / 2 # Valor da possivel raiz
-        fx = eval(func) # Valor da função na possivel raiz
+# Função que calcula uma raiz aproximada usando o método da bisseção
+def bisseccao(inicio, fim, tolerancia, expressao):
+    # Cria o arquivo de saída com o cabeçalho
+    with open("bisseccao-res.txt", "w") as arquivo:
+        arquivo.write(
+            "a\t\t\t\tb\t\t\t\tf(a)\t\t\tf(b)\t\t\t(b-a)\t\t\t(b-a)/a\t\t\tx\t\t\t\tf(x)\n"
+        )
 
-        x_temp = x # Variavel temporaria para a possivel raiz
+    while True:
+        x = (inicio + fim) / 2  # Calcula o ponto médio
+        x_temp = x  # Salva temporariamente
 
-        # Valor de na função
-        x = a
-        fa = eval(func)
+        x = inicio
+        f_inicio = eval(expressao)
 
-        # Valor de b na função
-        x = b
-        fb = eval(func)
+        x = fim
+        f_fim = eval(expressao)
 
-        # Devolve o valor anterior para x
         x = x_temp
+        f_meio = eval(expressao)
 
-        # Escreve os resultados de iteração no arquivo como 6 digitos de precisão
-        with open("bisseccao-res.txt", "a") as file:
-            file.write(f"{a:6f}\t\t")
-            file.write(f"{b:6f}\t\t")
-            file.write(f"{fa:6f}\t\t")
-            file.write(f"{fb:6f}\t\t")
-            file.write(f"{(b - a):6f}\t\t")
-            file.write(f"{((b - a) / a):6f}\t\t")
-            file.write(f"{x:6f}\t\t")
-            file.write(f"{fx:6f}\n")
+        # Registra os dados da iteração no arquivo
+        with open("bisseccao-res.txt", "a") as arquivo:
+            arquivo.write(f"{inicio:6f}\t\t")
+            arquivo.write(f"{fim:6f}\t\t")
+            arquivo.write(f"{f_inicio:6f}\t\t")
+            arquivo.write(f"{f_fim:6f}\t\t")
+            arquivo.write(f"{(fim - inicio):6f}\t\t")
+            arquivo.write(f"{((fim - inicio) / inicio):6f}\t\t")
+            arquivo.write(f"{x:6f}\t\t")
+            arquivo.write(f"{f_meio:6f}\n")
 
-        # Se o modulo do resultado da função na possivel raiz for menor ou igual a tolerancia o algoritmo vai retornar esse x como raiz aproximada
-        if module(fx) <= epsilon:
+        # Verifica se encontrou a raiz dentro da tolerância
+        if modulo(f_meio) <= tolerancia:
             return x
 
-        # Caso o valor da função na possivel raiz seja negativo o valor de "a" será substituido por x
-        # Caso não seja negativo o valor de a continua o mesmo e o valor de "b" será trocado por x
-        if fx < 0:
-            a = x
-            b = b
+        # Atualiza os limites do intervalo
+        if f_meio < 0:
+            inicio = x
         else:
-            a = a
-            b = x
+            fim = x
 
-# Retorna o modulo de um número
-def module(x):
-    if x < 0:
-        return (-1 * x)
 
-    return x
+# Retorna o valor absoluto
+def modulo(valor):
+    return -valor if valor < 0 else valor
 
-# Faz a leitura da função no arquivo
-with open("bisseccao-fun.txt", "r") as file:
-    lines = file.readlines()
 
-# Pega a função do arquivo
-func = lines[0].rstrip()
+# Lê os dados do arquivo de entrada
+with open("bisseccao-fun.txt", "r") as arquivo:
+    linhas = arquivo.readlines()
 
-# a e b são os intervalos da raiz
-a_str, b_str = lines[1].split()
+expressao = linhas[0].strip()
+inicio_str, fim_str = linhas[1].split()
+inicio = float(inicio_str)
+fim = float(fim_str)
+tolerancia = float(linhas[2])
 
-a = float(a_str)
-b = float(b_str)
+# Executa o método e salva o resultado
+raiz_aproximada = bisseccao(inicio, fim, tolerancia, expressao)
 
-# Condição de parada
-epsilon = float(lines[2])
-
-# Raiz aproximada
-answer = bissection(a, b, epsilon, func)
-
-# Escreve o resultado no arquivo de resposta com 6 digitos de precisão
-with open("bisseccao-res.txt", "a") as file:
-            file.write(f"Raiz aproximadda = {answer:6f}")
+with open("bisseccao-res.txt", "a") as arquivo:
+    arquivo.write(f"Raiz aproximada = {raiz_aproximada:6f}")

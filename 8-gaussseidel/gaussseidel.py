@@ -1,70 +1,50 @@
 import math
 import numpy as np
 
-def comparar(x,xk,eps):
-    sum = 0
-    zip_object = zip(x, xk)
 
-    for list1_i, list2_i in zip_object:
-        sum = sum + math.fabs(list1_i-list2_i)
-
-    if (sum < eps):
-        return True
-    else:
-        return False   
+# Verifica se os vetores são suficientemente próximos (critério de parada)
+def convergiu(x_antigo, x_novo, epsilon):
+    erro = sum(abs(a - b) for a, b in zip(x_antigo, x_novo))
+    return erro < epsilon
 
 
-def gaussJacobi(A, b, maxiter, eps):
+# Método de Gauss-Jacobi para resolver sistemas lineares
+def gauss_jacobi(A, b, max_iteracoes, epsilon):
     n = len(b)
-    sol = True
     x = b.copy()
 
-    for i in list(range(1, n + 1, 1)):
-        if (math.fabs(A[i - 1][i - 1]) > 0.0):
-            x[i - 1] = b[i - 1] / A[i - 1][i - 1]
-        else:
-            sol = False
-        break
-  
-    if (sol):
-        xk = x.copy()
-        iter    = 0
-    
-        while (iter < maxiter):
-            iter = iter + 1
+    # Verifica se os pivôs não são nulos para evitar divisão por zero
+    for i in range(n):
+        if abs(A[i][i]) == 0:
+            return None  # Não dá pra continuar com pivô nulo
+        x[i] = b[i] / A[i][i]  # Chute inicial
 
-            for i in list(range(1, n + 1, 1)):
-                s = 0
-                for j in list(range(1, n + 1, 1)):
-                    if ((i - 1) != (j - 1)):
-                        s = s + A[i - 1][j - 1] * x[j - 1]
+    for _ in range(max_iteracoes):
+        x_novo = x.copy()
 
-                xk[i - 1] = (1 / A[i - 1][i - 1]) * (b[i - 1] - s)
+        for i in range(n):
+            soma = sum(A[i][j] * x[j] for j in range(n) if j != i)
+            x_novo[i] = (b[i] - soma) / A[i][i]
 
-            if comparar(x, xk, eps):
-                x = xk.copy()
-                break    
-            x = xk.copy()
+        if convergiu(x, x_novo, epsilon):
+            x = x_novo
+            break
+
+        x = x_novo
 
     return x
 
-# Faz a leitura do arquivo onde tem a matriz com os coeficientes das equações
-with open("gaussseidel-mat.txt", 'r') as file:
-    lines = file.readlines()
 
-# Coloca os valores dentro das variaveis array para a matriz e vector para o vetor onde tem os termos independentes
-lines = [line.strip() for line in lines if line.strip()]
-array = np.array([list(map(float, line.split())) for line in lines[:-1]])
-vector = np.array(list(map(float, lines[-1].split())))
+# Lê a matriz A e o vetor B do arquivo
+with open("gaussseidel-mat.txt", "r") as arquivo:
+    linhas = [linha.strip() for linha in arquivo if linha.strip()]
+    A = np.array([list(map(float, linha.split())) for linha in linhas[:-1]])
+    B = np.array(list(map(float, linhas[-1].split())))
 
-# answer possui os valores de x
-answer = gaussJacobi(array, vector, 10, 0.01)
+# Aplica o método de Gauss-Jacobi
+solucao = gauss_jacobi(A, B, max_iteracoes=10, epsilon=0.01)
 
-# Abre o arquivo gaussseidel-res.txt para escrever os resultados
-with open("gaussseidel-res.txt", 'w') as file:
-        i = 0 # Contador
-
-        # Escreve os resultados dos sistemas
-        for element in answer:
-            file.write(f"x{i} = " + str(element) + '\n')
-            i = i + 1
+# Escreve os resultados em um arquivo
+with open("gaussseidel-res.txt", "w") as arquivo:
+    for i, valor in enumerate(solucao):
+        arquivo.write(f"x{i} = {valor}\n")

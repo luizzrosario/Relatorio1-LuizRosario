@@ -1,74 +1,52 @@
-# Importa pacotes para usar dentro do codigo
 import numpy as np
 import math
 
-# Metodo para descobrir se a condição de parada da convergência foi atingida 
-def comparar(x, xk, eps):
-    sum = 0
-    zip_object = zip(x, xk)
 
-    for list1_i, list2_i in zip_object:
-        sum = sum + math.fabs(list1_i - list2_i)
+# Verifica se a diferença entre dois vetores é menor que a tolerância
+def convergiu(x_antigo, x_novo, epsilon):
+    erro = sum(abs(a - b) for a, b in zip(x_antigo, x_novo))
+    return erro < epsilon
 
-    if (sum < eps):
-        return True
-    else:
-        return False   
 
-# Metodo para calcular as soluções do sistema
-def jacobi(A, b, maxiter, eps):
+# Método de Jacobi para resolver sistemas lineares
+def jacobi(A, b, max_iteracoes, epsilon):
     n = len(b)
-    sol = True
     x = b.copy()
 
-    for i in list(range(1, n + 1, 1)):
-        if (math.fabs(A[i - 1][i-1]) > 0.0):
-            x[i - 1] = b[i - 1] / A[i - 1][i - 1]
+    # Inicializa x com uma aproximação inicial
+    for i in range(n):
+        if abs(A[i][i]) > 0:
+            x[i] = b[i] / A[i][i]
         else:
-            sol = False
+            # Se encontrar um pivô nulo, não é possível aplicar o método
+            return None
+
+    for _ in range(max_iteracoes):
+        x_novo = x.copy()
+
+        for i in range(n):
+            soma = sum(A[i][j] * x[j] for j in range(n) if j != i)
+            x_novo[i] = (b[i] - soma) / A[i][i]
+
+        if convergiu(x, x_novo, epsilon):
+            x = x_novo
             break
-  
-    if(sol):
-        xk = x.copy()
-        iter = 0
- 
-        while(iter < maxiter):
-            iter = iter + 1
 
-            for i in list(range(1, n + 1, 1)):
-                s = 0
-
-                for j in list(range(1, n + 1, 1)):
-                    if ((i - 1) != (j - 1)):
-                        s = s + A[i - 1][j - 1] * x[j - 1]
-
-                xk[i - 1] = (1 / A[i - 1][i - 1]) * (b[i - 1] - s)
-     
-            if comparar(x, xk, eps):
-                x = xk.copy()
-                break    
-
-            x = xk.copy()
+        x = x_novo
 
     return x
 
-# Faz a leitura do arquivo onde tem a matriz com os coeficientes das equações
-with open("jacobi-mat.txt", 'r') as file:
-    lines = file.readlines()
 
-# Coloca os valores dentro das variaveis array para a matriz e vector para o vetor onde tem os termos independentes
-lines = [line.strip() for line in lines if line.strip()]
-array = np.array([list(map(float, line.split())) for line in lines[:-1]])
-vector = np.array(list(map(float, lines[-1].split())))
+# Lê a matriz A e o vetor B do arquivo
+with open("jacobi-mat.txt", "r") as arquivo:
+    linhas = [linha.strip() for linha in arquivo if linha.strip()]
+    A = np.array([list(map(float, linha.split())) for linha in linhas[:-1]])
+    B = np.array(list(map(float, linhas[-1].split())))
 
-# answer possui os valores de x
-answer = jacobi(array, vector, 10, 0.01)
+# Aplica o método de Jacobi
+solucao = jacobi(A, B, max_iteracoes=10, epsilon=0.01)
 
-# Abre o arquivo jacobi-res.txt para escrever os resultados
-with open("jacobi-res.txt", 'w') as file:
-        i = 0 # Contador
-
-        # Escreve os resultados dos sistemas
-        for element in answer:
-            file.write(f"x{i} = " + str(element) + '\n')
-            i = i + 1
+# Escreve o resultado no arquivo
+with open("jacobi-res.txt", "w") as arquivo:
+    for i, valor in enumerate(solucao):
+        arquivo.write(f"x{i} = {valor}\n")
