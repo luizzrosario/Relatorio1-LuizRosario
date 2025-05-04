@@ -1,6 +1,7 @@
 3.3:
 (0.1)
 1 - (1 + x + (x**2 / 2)) * math.e**-x - 0.1
+(x**2 / 2) * math.exp(-x)
 1.1 1.2
 0.0001
 geo: f(x) = 1 - (1 + x + (x^2 / 2)) * e^(-x) - 0.1
@@ -16,6 +17,10 @@ raiz: 5.321875
 
 3.6: 
 (math.sin(x) * math.cos(x)) / (0.8 - math.cos(x)**2) - math.tan(math.radians(40))
+x: (
+    ((math.cos(x)**2 - math.sin(x)**2) * (0.8 - math.cos(x)**2) - 2 * math.sin(x)**2 * math.cos(x)**2)
+    / (0.8 - math.cos(x)**2)**2
+)
 1 1.05
 0.0001
 geo: f(x) = (sin(x) * cos(x)) / (0.8 - cos(x)^2) - tan(40°)
