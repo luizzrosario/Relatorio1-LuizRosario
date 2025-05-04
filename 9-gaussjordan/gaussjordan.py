@@ -1,39 +1,30 @@
 import numpy as np
 
-# Lê a matriz do arquivo "gaussjordan-mat.txt"
-with open("gaussjordan-mat.txt", "r") as arquivo:
-    tamanho = int(arquivo.readline().strip())  # Lê o tamanho da matriz (n x n)
-    matriz_original = []
-    for _ in range(tamanho):
-        linha = list(map(float, arquivo.readline().strip().split()))
-        matriz_original.append(linha)
+# Lê os dados do arquivo
+with open('gaussjordan-mat.txt') as file:
+    lines = file.readlines()
 
-# Cria a matriz aumentada [A | I], onde I é a identidade
-A = np.array(matriz_original)
-identidade = np.identity(tamanho)
-aumentada = np.hstack((A, identidade))
+# Primeira linha: tolerância do erro
+tolerancia = float(lines[0])
 
-# Aplica o método de Gauss-Jordan para obter a inversa de A
-for i in range(tamanho):
-    pivo = aumentada[i, i]
+# Demais linhas: coeficientes da matriz aumentada
+matriz = [list(map(float, line.split())) for line in lines[1:]]
+matriz = np.array(matriz)
+n = len(matriz)
 
-    if pivo == 0:
-        raise ValueError("A matriz não é inversível (pivô zero).")
-
-    # Normaliza a linha do pivô
-    aumentada[i, :] /= pivo
-
-    # Zera os elementos acima e abaixo do pivô
-    for j in range(tamanho):
+# Método de Gauss-Jordan
+for i in range(n):
+    # Faz a diagonal principal igual a 1
+    matriz[i, :] /= matriz[i, i]
+    # Elimina os coeficientes abaixo e acima da diagonal
+    for j in range(n):
         if i != j:
-            multiplicador = aumentada[j, i]
-            aumentada[j, :] -= multiplicador * aumentada[i, :]
+            matriz[j, :] -= matriz[j, i] * matriz[i, :]
 
-# A parte direita da matriz aumentada agora é a inversa de A
-matriz_inversa = aumentada[:, tamanho:]
+# Extraímos as soluções da última coluna
+solucoes = [f'x{i + 1} = {matriz[i, n]}' for i in range(n)]
 
-# Salva a matriz inversa no arquivo "gaussjordan-res.txt"
-with open("gaussjordan-res.txt", "w") as arquivo:
-    for linha in matriz_inversa:
-        linha_formatada = " ".join(f"{valor:.3f}" for valor in linha)
-        arquivo.write(linha_formatada + "\n")
+# Salva as soluções em um arquivo "output.txt"
+with open("gaussjordan-res.txt", "w") as file:
+    file.write('\n'.join(solucoes))
+

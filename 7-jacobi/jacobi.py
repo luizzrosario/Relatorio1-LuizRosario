@@ -1,52 +1,60 @@
 import numpy as np
-import math
 
+# Carrega os dados do arquivo em uma matriz
+with open('jacobi-mat.txt') as file:
+    lines = file.readlines()
 
-# Verifica se a diferença entre dois vetores é menor que a tolerância
-def convergiu(x_antigo, x_novo, epsilon):
-    erro = sum(abs(a - b) for a, b in zip(x_antigo, x_novo))
-    return erro < epsilon
+# Lê a tolerância de erro da primeira linha do arquivo
+tolerancia = float(lines[0])
 
+# Resto do arquivo contém os coeficientes da matriz e os valores do lado direito
+matriz = []
+for line in lines[1:]:
+    matriz.append(list(map(float, line.split())))
 
-# Método de Jacobi para resolver sistemas lineares
-def jacobi(A, b, max_iteracoes, epsilon):
-    n = len(b)
-    x = b.copy()
+# Converte a matriz em um array numpy
+matriz = np.array(matriz)
+n = len(matriz)
 
-    # Inicializa x com uma aproximação inicial
+# Monta a estrutura da matriz para o método de Jacobi
+jacobi = np.zeros((n, n + 1))
+for i in range(n):
+    jacobi[i, :] = matriz[i, :] / matriz[i, i]
+    jacobi[i, n] = matriz[i, n] / matriz[i, i]
+    jacobi[i, i] = 0
+
+jacobi = -jacobi
+jacobi[:, n] = -jacobi[:, n]
+resultados = np.copy(jacobi[:, n])
+jacobi = jacobi[:, :-1]
+
+# Verifica se a matriz é diagonalmente dominante
+diagonalmente_dominante = all(
+    abs(matriz[i, i]) >= np.sum(np.abs(matriz[i, :-1])) - abs(matriz[i, i])
+    for i in range(n)
+)
+
+# Se não for dominante, salva aviso no arquivo e encerra
+if not diagonalmente_dominante:
+    with open("jacobi-res.txt", "w") as file:
+        file.write("A matriz não é diagonalmente dominante. O método pode não convergir.\n")
+    exit()
+
+# Inicializa o vetor solução
+x = np.zeros(n)
+iteracoes = 0
+
+# Iterações do método de Jacobi
+while True:
+    x_anterior = x.copy()
+    x = np.dot(jacobi, x) + resultados
+    iteracoes += 1
+    erro = np.linalg.norm(x - x_anterior)
+    if erro < tolerancia:
+        break
+
+# Salva as soluções no arquivo
+with open("jacobi-res.txt", "w") as file:
     for i in range(n):
-        if abs(A[i][i]) > 0:
-            x[i] = b[i] / A[i][i]
-        else:
-            # Se encontrar um pivô nulo, não é possível aplicar o método
-            return None
-
-    for _ in range(max_iteracoes):
-        x_novo = x.copy()
-
-        for i in range(n):
-            soma = sum(A[i][j] * x[j] for j in range(n) if j != i)
-            x_novo[i] = (b[i] - soma) / A[i][i]
-
-        if convergiu(x, x_novo, epsilon):
-            x = x_novo
-            break
-
-        x = x_novo
-
-    return x
-
-
-# Lê a matriz A e o vetor B do arquivo
-with open("jacobi-mat.txt", "r") as arquivo:
-    linhas = [linha.strip() for linha in arquivo if linha.strip()]
-    A = np.array([list(map(float, linha.split())) for linha in linhas[:-1]])
-    B = np.array(list(map(float, linhas[-1].split())))
-
-# Aplica o método de Jacobi
-solucao = jacobi(A, B, max_iteracoes=10, epsilon=0.01)
-
-# Escreve o resultado no arquivo
-with open("jacobi-res.txt", "w") as arquivo:
-    for i, valor in enumerate(solucao):
-        arquivo.write(f"x{i} = {valor}\n")
+        file.write(f'x{i + 1} = {x[i]}\n')
+    file.write(f'iteracoes necessarias: {iteracoes}\n')

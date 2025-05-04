@@ -1,50 +1,53 @@
-import math
 import numpy as np
 
+# Lê os dados do arquivo
+with open('gaussseidel-mat.txt') as file:
+    lines = file.readlines()
 
-# Verifica se os vetores são suficientemente próximos (critério de parada)
-def convergiu(x_antigo, x_novo, epsilon):
-    erro = sum(abs(a - b) for a, b in zip(x_antigo, x_novo))
-    return erro < epsilon
+# Primeira linha: tolerância do erro
+tolerancia = float(lines[0])
 
+# Demais linhas: coeficientes da matriz aumentada
+matriz = [list(map(float, line.split())) for line in lines[1:]]
+matriz = np.array(matriz)
+n = len(matriz)
 
-# Método de Gauss-Jacobi para resolver sistemas lineares
-def gauss_jacobi(A, b, max_iteracoes, epsilon):
-    n = len(b)
-    x = b.copy()
+# Prepara a matriz para o método de Gauss-Seidel
+gauss_seidel = np.zeros((n, n + 1))
+for i in range(n):
+    gauss_seidel[i, :] = matriz[i, :] / matriz[i, i]
+    gauss_seidel[i, n] = matriz[i, n] / matriz[i, i]
+    gauss_seidel[i, i] = 0  # zera o coeficiente da diagonal principal
 
-    # Verifica se os pivôs não são nulos para evitar divisão por zero
+# Separa os termos independentes e ajusta os sinais
+gauss_seidel = -gauss_seidel
+gauss_seidel[:, n] = -gauss_seidel[:, n]
+resultados = np.copy(gauss_seidel[:, n])
+gauss_seidel = gauss_seidel[:, :-1]
+
+# Verifica convergência pelo critério das linhas (diagonal dominante)
+dominante = all(abs(matriz[i, i]) >= np.sum(np.abs(matriz[i, :-1])) - abs(matriz[i, i]) for i in range(n))
+if not dominante:
+    with open("gaussseildel-res.txt", "w") as file:
+        file.write("A matriz não é diagonalmente dominante. O método de Gauss-Seidel pode não convergir.\n")
+    exit()
+
+# Iterações do método
+x = np.zeros(n)
+iteracoes = 0
+while True:
+    anterior = x.copy()
     for i in range(n):
-        if abs(A[i][i]) == 0:
-            return None  # Não dá pra continuar com pivô nulo
-        x[i] = b[i] / A[i][i]  # Chute inicial
+        x[i] = np.dot(gauss_seidel[i, :], x) + resultados[i]
+    iteracoes += 1
+    erro = np.linalg.norm(x - anterior)
+    if erro < tolerancia:
+        break
 
-    for _ in range(max_iteracoes):
-        x_novo = x.copy()
+# Gera o texto das soluções
+solucoes = [f'x{i + 1} = {x[i]}' for i in range(n)]
 
-        for i in range(n):
-            soma = sum(A[i][j] * x[j] for j in range(n) if j != i)
-            x_novo[i] = (b[i] - soma) / A[i][i]
-
-        if convergiu(x, x_novo, epsilon):
-            x = x_novo
-            break
-
-        x = x_novo
-
-    return x
-
-
-# Lê a matriz A e o vetor B do arquivo
-with open("gaussseidel-mat.txt", "r") as arquivo:
-    linhas = [linha.strip() for linha in arquivo if linha.strip()]
-    A = np.array([list(map(float, linha.split())) for linha in linhas[:-1]])
-    B = np.array(list(map(float, linhas[-1].split())))
-
-# Aplica o método de Gauss-Jacobi
-solucao = gauss_jacobi(A, B, max_iteracoes=10, epsilon=0.01)
-
-# Escreve os resultados em um arquivo
-with open("gaussseidel-res.txt", "w") as arquivo:
-    for i, valor in enumerate(solucao):
-        arquivo.write(f"x{i} = {valor}\n")
+# Salva os resultados
+with open("gaussseidel-res.txt", "w") as file:
+    file.write('\n'.join(solucoes))
+    file.write(f'\niteracoes necessarias: {iteracoes}')
