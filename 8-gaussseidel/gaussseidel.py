@@ -1,7 +1,7 @@
 import numpy as np
 
 # Lê os dados do arquivo
-with open('gaussseidel-mat.txt') as file:
+with open("gaussseidel-mat.txt") as file:
     lines = file.readlines()
 
 # Primeira linha: tolerância do erro
@@ -26,10 +26,15 @@ resultados = np.copy(gauss_seidel[:, n])
 gauss_seidel = gauss_seidel[:, :-1]
 
 # Verifica convergência pelo critério das linhas (diagonal dominante)
-dominante = all(abs(matriz[i, i]) >= np.sum(np.abs(matriz[i, :-1])) - abs(matriz[i, i]) for i in range(n))
+dominante = all(
+    abs(matriz[i, i]) >= np.sum(np.abs(matriz[i, :-1])) - abs(matriz[i, i])
+    for i in range(n)
+)
 if not dominante:
     with open("gaussseildel-res.txt", "w") as file:
-        file.write("A matriz não é diagonalmente dominante. O método de Gauss-Seidel pode não convergir.\n")
+        file.write(
+            "A matriz não é diagonalmente dominante. O método de Gauss-Seidel pode não convergir.\n"
+        )
     exit()
 
 # Iterações do método
@@ -45,9 +50,9 @@ while True:
         break
 
 # Gera o texto das soluções
-solucoes = [f'x{i + 1} = {x[i]}' for i in range(n)]
+solucoes = [f"x{i + 1} = {x[i]}" for i in range(n)]
 
 # Salva os resultados
 with open("gaussseidel-res.txt", "w") as file:
-    file.write('\n'.join(solucoes))
-    file.write(f'\niteracoes necessarias: {iteracoes}')
+    file.write("\n".join(solucoes))
+    file.write(f"\niteracoes necessarias: {iteracoes}")

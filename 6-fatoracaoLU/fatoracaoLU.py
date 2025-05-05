@@ -1,12 +1,12 @@
 import numpy as np
 
 # Lê os dados da matriz aumentada do sistema
-matriz = np.loadtxt('fatoracaoLU-mat.txt')
+matriz = np.loadtxt("fatoracaoLU-mat.txt")
 n = len(matriz)
 num_colunas = matriz.shape[1]
 
-b = matriz[:, -1]             # Termos independentes
-U = matriz[:, :-1].copy()     # Coeficientes da matriz
+b = matriz[:, -1]  # Termos independentes
+U = matriz[:, :-1].copy()  # Coeficientes da matriz
 
 valores_L = []
 
@@ -36,9 +36,9 @@ for i in range(n):
 # Resolve U * x = y
 x = np.zeros(n)
 for i in range(n - 1, -1, -1):
-    x[i] = (y[i] - np.dot(U[i, i + 1:], x[i + 1:])) / U[i][i]
+    x[i] = (y[i] - np.dot(U[i, i + 1 :], x[i + 1 :])) / U[i][i]
 
 # Salva as soluções no arquivo de saída
 with open("fatoracaoLU-res.txt", "w") as file:
     for i in range(n):
-        file.write(f'x{i + 1} = {x[i]}\n')
+        file.write(f"x{i + 1} = {x[i]}\n")

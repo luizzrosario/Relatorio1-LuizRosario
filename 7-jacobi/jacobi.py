@@ -1,7 +1,7 @@
 import numpy as np
 
 # Carrega os dados do arquivo em uma matriz
-with open('jacobi-mat.txt') as file:
+with open("jacobi-mat.txt") as file:
     lines = file.readlines()
 
 # Lê a tolerância de erro da primeira linha do arquivo
@@ -37,7 +37,9 @@ diagonalmente_dominante = all(
 # Se não for dominante, salva aviso no arquivo e encerra
 if not diagonalmente_dominante:
     with open("jacobi-res.txt", "w") as file:
-        file.write("A matriz não é diagonalmente dominante. O método pode não convergir.\n")
+        file.write(
+            "A matriz não é diagonalmente dominante. O método pode não convergir.\n"
+        )
     exit()
 
 # Inicializa o vetor solução
@@ -56,5 +58,5 @@ while True:
 # Salva as soluções no arquivo
 with open("jacobi-res.txt", "w") as file:
     for i in range(n):
-        file.write(f'x{i + 1} = {x[i]}\n')
-    file.write(f'iteracoes necessarias: {iteracoes}\n')
+        file.write(f"x{i + 1} = {x[i]}\n")
+    file.write(f"iteracoes necessarias: {iteracoes}\n")

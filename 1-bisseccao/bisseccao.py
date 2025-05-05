@@ -1,5 +1,6 @@
 import math  # Importa a biblioteca para operações matemáticas
 
+
 # Função que calcula uma raiz aproximada usando o método da bisseção
 def bisseccao(inicio, fim, tolerancia, expressao):
     # Avalia os extremos do intervalo
@@ -9,7 +10,9 @@ def bisseccao(inicio, fim, tolerancia, expressao):
     f_fim = eval(expressao)
 
     if f_inicio * f_fim > 0:
-        raise ValueError("O intervalo não contém mudança de sinal. Escolha outro intervalo.")
+        raise ValueError(
+            "O intervalo não contém mudança de sinal. Escolha outro intervalo."
+        )
 
     # Cria o arquivo de saída com o cabeçalho
     with open("bisseccao-res.txt", "w") as arquivo:

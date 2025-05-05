@@ -1,7 +1,7 @@
 import numpy as np
 
 # Lê os dados do arquivo
-with open('gaussjordan-mat.txt') as file:
+with open("gaussjordan-mat.txt") as file:
     lines = file.readlines()
 
 # Primeira linha: tolerância do erro
@@ -22,9 +22,8 @@ for i in range(n):
             matriz[j, :] -= matriz[j, i] * matriz[i, :]
 
 # Extraímos as soluções da última coluna
-solucoes = [f'x{i + 1} = {matriz[i, n]}' for i in range(n)]
+solucoes = [f"x{i + 1} = {matriz[i, n]}" for i in range(n)]
 
 # Salva as soluções em um arquivo "output.txt"
 with open("gaussjordan-res.txt", "w") as file:
-    file.write('\n'.join(solucoes))
-
+    file.write("\n".join(solucoes))
